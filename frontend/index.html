@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniOps - Autonomous Enterprise Agentic System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <i class="fa-solid fa-robot text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+          OmniOps AI Copilot
+        </h1>
+        <p class="text-xs text-slate-400 flex items-center space-x-2">
+          <span>Enterprise n8n Agentic System</span>
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-emerald-400 font-mono">ONLINE</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Mode Selector & API Status -->
+    <div class="flex items-center space-x-4">
+      <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs flex items-center space-x-2">
+        <span class="text-slate-400">Target:</span>
+        <select id="endpointSelect" class="bg-transparent text-cyan-400 font-medium focus:outline-none cursor-pointer">
+          <option value="simulated">Direct API Engine (Port 8000)</option>
+          <option value="n8n">n8n Webhook (/webhook/omniops-agent)</option>
+        </select>
+      </div>
+      <a href="https://github.com/aizazahmad736" target="_blank" class="text-xs text-slate-400 hover:text-white transition flex items-center space-x-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+        <i class="fa-brands fa-github"></i>
+        <span>aizazahmad736</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 max-w-7xl mx-auto w-full">
+
+    <!-- Left Column: Scenario Presets & Live Database Inspection (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col space-y-4">
+      
+      <!-- Scenario Launcher -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <h2 class="text-sm font-semibold text-slate-300 flex items-center space-x-2 mb-3">
+          <i class="fa-solid fa-bolt text-amber-400"></i>
+          <span>Instant Agent Test Scenarios</span>
+        </h2>
+        <div class="space-y-2">
+          <button onclick="runScenario(1)" class="w-full text-left p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition group">
+            <div class="flex items-center justify-between text-xs font-semibold text-cyan-400 mb-1">
+              <span>Scenario 1: KB Policy Search</span>
+              <i class="fa-solid fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1"></i>
+            </div>
+            <p class="text-xs text-slate-300">"What is your refund policy on electronic items?"</p>
+          </button>
+
+          <button onclick="runScenario(2)" class="w-full text-left p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition group">
+            <div class="flex items-center justify-between text-xs font-semibold text-cyan-400 mb-1">
+              <span>Scenario 2: CRM & Order Tracking</span>
+              <i class="fa-solid fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1"></i>
+            </div>
+            <p class="text-xs text-slate-300">"Where is order #ORD-9021 for Sarah Connor (sarah@cyberdyne.com)?"</p>
+          </button>
+
+          <button onclick="runScenario(3)" class="w-full text-left p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition group">
+            <div class="flex items-center justify-between text-xs font-semibold text-emerald-400 mb-1">
+              <span>Scenario 3: Auto-Approved Refund</span>
+              <i class="fa-solid fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1"></i>
+            </div>
+            <p class="text-xs text-slate-300">"Refund order #ORD-8812 ($45 cable) for customer CUST-101."</p>
+          </button>
+
+          <button onclick="runScenario(4)" class="w-full text-left p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition group">
+            <div class="flex items-center justify-between text-xs font-semibold text-amber-400 mb-1">
+              <span>Scenario 4: High-Value Escalation</span>
+              <i class="fa-solid fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1"></i>
+            </div>
+            <p class="text-xs text-slate-300">"I want a $350 refund on ORD-9021 because the unit overheats."</p>
+          </button>
+
+          <button onclick="runScenario(5)" class="w-full text-left p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition group">
+            <div class="flex items-center justify-between text-xs font-semibold text-fuchsia-400 mb-1">
+              <span>Scenario 5: VIP Priority Escalation</span>
+              <i class="fa-solid fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1"></i>
+            </div>
+            <p class="text-xs text-slate-300">"Bruce Wayne (bruce@wayneenterprises.com): Security Link ORD-9999 has delay issues!"</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Enterprise State (Tickets & Alerts) -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl flex-1 flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-slate-300 flex items-center space-x-2">
+            <i class="fa-solid fa-database text-cyan-400"></i>
+            <span>System State Inspector</span>
+          </h2>
+          <button onclick="refreshState()" class="text-xs text-slate-400 hover:text-white transition">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+
+        <div class="flex border-b border-slate-800 mb-3 text-xs">
+          <button onclick="showTab('tickets')" id="tab-tickets" class="pb-2 font-semibold text-cyan-400 border-b-2 border-cyan-400 mr-4">Tickets (<span id="ticketCount">0</span>)</button>
+          <button onclick="showTab('alerts')" id="tab-alerts" class="pb-2 text-slate-400 hover:text-slate-200 mr-4">Slack Alerts (<span id="alertCount">0</span>)</button>
+          <button onclick="showTab('crm')" id="tab-crm" class="pb-2 text-slate-400 hover:text-slate-200">CRM Profiles</button>
+        </div>
+
+        <!-- Tab 1: Tickets -->
+        <div id="panel-tickets" class="flex-1 overflow-y-auto max-h-56 space-y-2 pr-1 scrollbar-thin text-xs">
+          <p class="text-slate-500 italic py-2">No tickets generated yet. Run Scenario 4 or 5 to see auto-escalation.</p>
+        </div>
+
+        <!-- Tab 2: Alerts -->
+        <div id="panel-alerts" class="hidden flex-1 overflow-y-auto max-h-56 space-y-2 pr-1 scrollbar-thin text-xs">
+          <p class="text-slate-500 italic py-2">No alerts dispatched yet.</p>
+        </div>
+
+        <!-- Tab 3: CRM -->
+        <div id="panel-crm" class="hidden flex-1 overflow-y-auto max-h-56 space-y-2 pr-1 scrollbar-thin text-xs">
+          <div class="p-2 rounded-lg bg-slate-800/40 border border-slate-800">
+            <span class="text-amber-400 font-semibold">Sarah Connor</span> (CUST-101) - VIP Enterprise<br/>
+            <span class="text-slate-400">Orders: ORD-9021 ($350), ORD-8812 ($45)</span>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-800/40 border border-slate-800">
+            <span class="text-cyan-400 font-semibold">Alex Mercer</span> (CUST-102) - Standard<br/>
+            <span class="text-slate-400">Orders: ORD-7744 ($89)</span>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-800/40 border border-slate-800">
+            <span class="text-fuchsia-400 font-semibold">Bruce Wayne</span> (CUST-103) - Executive Platinum<br/>
+            <span class="text-slate-400">Orders: ORD-9999 ($4200)</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Center/Right Column: Interactive Chat & Live ReAct Tool Execution Audit (8 cols) -->
+    <section class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Chat Stream -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl flex flex-col h-[650px] shadow-2xl overflow-hidden">
+        <!-- Chat Header -->
+        <div class="p-4 border-b border-slate-800 bg-slate-900 flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-3 h-3 rounded-full bg-cyan-500 shadow-md shadow-cyan-500/50"></div>
+            <span class="text-xs font-semibold tracking-wide uppercase text-slate-300">Autonomous ReAct Dialogue</span>
+          </div>
+          <button onclick="clearChat()" class="text-xs text-slate-500 hover:text-slate-300 transition">
+            <i class="fa-solid fa-trash-can mr-1"></i> Clear
+          </button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin text-xs">
+          <!-- Initial Welcome Message -->
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-400 flex-shrink-0">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 max-w-[85%] text-slate-200">
+              <p class="font-semibold text-cyan-400 mb-1">OmniOps AI Copilot</p>
+              <p>Hello! I am your Autonomous Enterprise Operations Agent. I have active tool integrations with our CRM database, Order Management API, Policy Vector Base, and Zendesk ticketing system.</p>
+              <p class="mt-2 text-slate-400">Click any preset scenario on the left or type your query below to test my autonomous ReAct decision loop.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="p-3 border-t border-slate-800 bg-slate-900/60">
+          <form id="chatForm" onsubmit="handleSend(event)" class="flex items-center space-x-2">
+            <input 
+              type="text" 
+              id="userInput" 
+              placeholder="Ask about orders, policies, refunds, or customer details..." 
+              class="flex-1 bg-slate-800/90 border border-slate-700 text-xs rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition text-slate-100 placeholder-slate-500"
+            />
+            <button 
+              type="submit" 
+              id="sendBtn"
+              class="bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-medium text-xs px-5 py-3 rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center space-x-2"
+            >
+              <span>Send</span>
+              <i class="fa-solid fa-paper-plane text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Live ReAct Tool Execution Audit Stream -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl flex flex-col h-[650px] shadow-2xl overflow-hidden">
+        <div class="p-4 border-b border-slate-800 bg-slate-900 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-microchip text-fuchsia-400"></i>
+            <span class="text-xs font-semibold tracking-wide uppercase text-slate-300">Live Agent Telemetry & Tool Calls</span>
+          </div>
+          <span class="mono text-[10px] bg-slate-800 text-fuchsia-400 px-2 py-0.5 rounded border border-slate-700">OBSERVABILITY</span>
+        </div>
+
+        <div id="telemetryFeed" class="flex-1 p-4 overflow-y-auto space-y-3 scrollbar-thin mono text-[11px]">
+          <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-400">
+            <div class="flex items-center justify-between text-slate-500 text-[10px] mb-1">
+              <span>SYSTEM_INIT</span>
+              <span>READY</span>
+            </div>
+            <p class="text-slate-300">Waiting for agent invocation. All 5 enterprise tool endpoints loaded.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-800/60 bg-slate-900/40 text-center py-3 text-xs text-slate-500">
+    Designed for n8n AI Agent Workflow • Powered by Python FastAPI & LangChain Agents • Open Source
+  </footer>
+
+  <script>
+    const API_BASE = "http://localhost:8000";
+
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          refreshState();
+          pollLogs();
+        }
+      } catch (err) {
+        console.warn("Backend API not reachable at", API_BASE, err);
+      }
+    }
+
+    async function refreshState() {
+      try {
+        const [tRes, nRes] = await Promise.all([
+          fetch(`${API_BASE}/api/tickets`),
+          fetch(`${API_BASE}/api/notifications`)
+        ]);
+        const tData = await tRes.json();
+        const nData = await nRes.json();
+
+        document.getElementById("ticketCount").innerText = tData.total;
+        document.getElementById("alertCount").innerText = nData.notifications.length;
+
+        // Render tickets
+        const tPanel = document.getElementById("panel-tickets");
+        if (tData.tickets.length === 0) {
+          tPanel.innerHTML = '<p class="text-slate-500 italic py-2">No tickets generated yet.</p>';
+        } else {
+          tPanel.innerHTML = tData.tickets.map(t => `
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/80">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-amber-400 font-mono">${t.ticket_id}</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.priority === 'P1' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${t.priority}</span>
+              </div>
+              <p class="font-medium text-slate-200">${t.subject}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${t.description}</p>
+            </div>
+          `).join('');
+        }
+
+        // Render alerts
+        const aPanel = document.getElementById("panel-alerts");
+        if (nData.notifications.length === 0) {
+          aPanel.innerHTML = '<p class="text-slate-500 italic py-2">No alerts dispatched yet.</p>';
+        } else {
+          aPanel.innerHTML = nData.notifications.map(a => `
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/80">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-fuchsia-400 font-mono">${a.channel}</span>
+                <span class="text-[10px] text-slate-400">${new Date(a.timestamp).toLocaleTimeString()}</span>
+              </div>
+              <p class="text-slate-300">${a.message}</p>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error("Error refreshing state:", err);
+      }
+    }
+
+    async function pollLogs() {
+      try {
+        const res = await fetch(`${API_BASE}/api/logs`);
+        const data = await res.json();
+        const feed = document.getElementById("telemetryFeed");
+        
+        if (data.logs && data.logs.length > 0) {
+          feed.innerHTML = data.logs.slice(0, 15).map(log => {
+            let color = "text-cyan-400 border-cyan-500/30 bg-cyan-950/20";
+            if (log.action.includes("APPROVED")) color = "text-emerald-400 border-emerald-500/30 bg-emerald-950/20";
+            if (log.action.includes("ESCALATED") || log.action.includes("ALERT")) color = "text-amber-400 border-amber-500/30 bg-amber-950/20";
+            if (log.action.includes("FAILED")) color = "text-red-400 border-red-500/30 bg-red-950/20";
+
+            return `
+              <div class="p-2.5 rounded-xl border ${color}">
+                <div class="flex items-center justify-between text-[10px] opacity-75 mb-1">
+                  <span class="font-bold tracking-wider">${log.action}</span>
+                  <span>${new Date(log.timestamp).toLocaleTimeString()}</span>
+                </div>
+                <div class="text-[10px] text-slate-300 overflow-x-auto whitespace-pre-wrap">${JSON.stringify(log.details, null, 2)}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) {}
+    }
+
+    setInterval(pollLogs, 2500);
+
+    function showTab(tab) {
+      ['tickets', 'alerts', 'crm'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).className = 'pb-2 text-slate-400 hover:text-slate-200 mr-4';
+      });
+      document.getElementById(`panel-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-${tab}`).className = 'pb-2 font-semibold text-cyan-400 border-b-2 border-cyan-400 mr-4';
+    }
+
+    function appendMessage(sender, text, isUser = false) {
+      const container = document.getElementById("chatMessages");
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
+
+      const avatar = isUser ? `
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      ` : `
+        <div class="w-8 h-8 rounded-lg bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-400 flex-shrink-0">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+      `;
+
+      const bubbleClass = isUser ? 
+        'bg-indigo-600 text-white rounded-2xl p-3.5 max-w-[85%]' : 
+        'bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 max-w-[85%] text-slate-200';
+
+      wrapper.innerHTML = `
+        ${avatar}
+        <div class="${bubbleClass}">
+          <p class="font-semibold text-xs ${isUser ? 'text-indigo-200' : 'text-cyan-400'} mb-1">${sender}</p>
+          <div class="text-xs leading-relaxed whitespace-pre-wrap">${text}</div>
+        </div>
+      `;
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function handleSend(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById("userInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage("You", text, true);
+      input.value = "";
+      
+      const target = document.getElementById("endpointSelect").value;
+
+      // Simulated agent execution directly calling the tools if n8n is not loaded,
+      // or calling the actual n8n webhook if n8n option is chosen!
+      if (target === "n8n") {
+        try {
+          const res = await fetch("http://localhost:5678/webhook/omniops-agent", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ message: text })
+          });
+          const data = await res.json();
+          appendMessage("OmniOps AI Copilot (via n8n)", data.response || JSON.stringify(data));
+          refreshState();
+        } catch (err) {
+          appendMessage("System Error", "Could not reach n8n webhook at http://localhost:5678/webhook/omniops-agent. Ensure n8n is running and workflow is active, or switch target to 'Direct API Engine'.");
+        }
+      } else {
+        // Direct Autonomous Logic Simulation
+        simulateAgentReAct(text);
+      }
+    }
+
+    async function simulateAgentReAct(query) {
+      const q = query.toLowerCase();
+      let response = "";
+
+      // Tool Call Simulation based on Intent & Query:
+      if (q.includes("policy") || q.includes("refund policy") || q.includes("warranty")) {
+        const res = await fetch(`${API_BASE}/api/kb/search?query=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        const top = data.articles[0];
+        response = `Based on our official enterprise knowledge base (${top.article_id}: ${top.title}):\n\n"${top.content}"\n\nIn summary, items under $100 can be refunded automatically within 30 days of delivery. Orders over $100 require manager approval.`;
+      } 
+      else if (q.includes("sarah") && q.includes("ord-9021") && (q.includes("where") || q.includes("track") || q.includes("status"))) {
+        await fetch(`${API_BASE}/api/customers/sarah@cyberdyne.com`);
+        const oRes = await fetch(`${API_BASE}/api/orders/ORD-9021`);
+        const oData = await oRes.json();
+        const ord = oData.order;
+        response = `Hello Sarah! I checked our records for customer CUST-101 (VIP Enterprise).\n\n• Order: ORD-9021 (${ord.item})\n• Status: ${ord.status} (Delivered on ${ord.delivery_date})\n• Carrier: ${ord.carrier} (Tracking: ${ord.tracking_code})\n• Return Eligible: ${ord.return_eligible ? 'Yes (30-day window active)' : 'No'}\n\nPlease let me know if you need any assistance with this delivery!`;
+      }
+      else if (q.includes("ord-8812") && q.includes("refund")) {
+        // Order under $100 -> Auto Approved
+        const rRes = await fetch(`${API_BASE}/api/orders/refund`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            order_id: "ORD-8812",
+            customer_id: "CUST-101",
+            amount: 45.00,
+            reason: "Customer request for cable return"
+          })
+        });
+        const rData = await rRes.json();
+        response = `✅ Refund Processed Successfully!\n\n• Refund Reference: ${rData.refund_id}\n• Order: ORD-8812 ($45.00)\n• Status: APPROVED\n\nPer policy POL-101, orders under $100 are automatically refunded to the customer's original payment method within 3 business days.`;
+      }
+      else if (q.includes("ord-9021") && (q.includes("refund") || q.includes("350") || q.includes("overheat"))) {
+        // Order over $100 -> Escalation ticket created
+        const rRes = await fetch(`${API_BASE}/api/orders/refund`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            order_id: "ORD-9021",
+            customer_id: "CUST-101",
+            amount: 350.00,
+            reason: "Unit overheats and customer requested full refund."
+          })
+        });
+        const rData = await rRes.json();
+        response = `⚠️ Refund Policy Notice:\n\n• Requested Amount: $350.00\n• Policy Rule: Per policy POL-101, automated refunds are capped at $100.\n• Escalation Ticket Created: ${rData.ticket_id}\n• Priority: High (P2) - Assigned to Billing & Finance Manager\n\nA senior account specialist has been assigned to approve this refund and will update you via email within 2 hours.`;
+      }
+      else if (q.includes("bruce") || q.includes("ord-9999")) {
+        // VIP Customer issue -> Alert dispatched
+        await fetch(`${API_BASE}/api/customers/bruce@wayneenterprises.com`);
+        const ordRes = await fetch(`${API_BASE}/api/orders/ORD-9999`);
+        const oData = await ordRes.json();
+        
+        await fetch(`${API_BASE}/api/tickets`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            customer_id: "CUST-103",
+            subject: "VIP Executive Inquiry: ORD-9999 Satellite Link in Transit",
+            description: "Mr. Bruce Wayne inquired about in-transit satellite link shipment delay.",
+            priority: "P1",
+            department: "logistics"
+          })
+        });
+
+        await fetch(`${API_BASE}/api/notify`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            channel: "#vip-support",
+            message: "🚨 VIP Platinum Alert: Bruce Wayne (CUST-103) requested status update on Mission Critical Satellite Link (ORD-9999). Ticket P1 logged.",
+            priority: "URGENT"
+          })
+        });
+
+        response = `Good day Mr. Wayne! As an Executive Platinum account holder, your request is prioritized.\n\n• Order ORD-9999: Autonomous Security Satellite Link\n• Amount: $4,200.00\n• Status: In Transit (${oData.order.carrier} Tracking: ${oData.order.tracking_code})\n\n🚨 VIP Protocol Activated:\n- Ticket P1 (Urgent Logistics) has been logged.\n- Direct alert sent to #vip-support on Slack.\n- Logistics dispatch is actively verifying carrier checkpoint data.`;
+      }
+      else {
+        // General query
+        response = `I have received your request. I can look up customer accounts (CUST-101, CUST-102, CUST-103), track orders (ORD-9021, ORD-8812, ORD-7744, ORD-9999), search company return & warranty policies, process refunds, and file escalation tickets. How may I assist you today?`;
+      }
+
+      appendMessage("OmniOps AI Copilot", response);
+      refreshState();
+    }
+
+    function runScenario(num) {
+      const scenarios = {
+        1: "What is your refund policy on electronic items?",
+        2: "Where is order #ORD-9021 for Sarah Connor (sarah@cyberdyne.com)?",
+        3: "Refund order #ORD-8812 ($45 cable) for customer CUST-101.",
+        4: "I want a $350 refund on ORD-9021 because the unit overheats.",
+        5: "Bruce Wayne (bruce@wayneenterprises.com): Security Link ORD-9999 has delay issues!"
+      };
+      document.getElementById("userInput").value = scenarios[num];
+      handleSend();
+    }
+
+    function clearChat() {
+      document.getElementById("chatMessages").innerHTML = "";
+    }
+
+    window.onload = checkHealth;
+  </script>
+</body>
+</html>
