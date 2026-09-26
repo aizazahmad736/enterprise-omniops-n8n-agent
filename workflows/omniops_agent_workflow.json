@@ -1,0 +1,330 @@
+{
+  "name": "OmniOps Autonomous Enterprise Support & Operations Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e1f13b62-3850-4820-9426-9a2df96c5601",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omniops-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e2f13b62-3850-4820-9426-9a2df96c5602",
+      "name": "Webhook API Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        480
+      ],
+      "webhookId": "omniops-agent-inbound"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput || $json.body?.message || $json.message || 'Hello' }}",
+        "options": {
+          "systemMessage": "You are OmniOps, an autonomous enterprise customer support and operations AI agent.\n\nYour Mission:\nDeliver fast, policy-compliant, accurate resolution for customers and internal operations.\n\nYour Reasoning Protocol (ReAct Loop):\n1. Identify Customer Context: When a customer gives an email or customer ID, use `crm_lookup` first to verify their identity and tier.\n2. Consult Policy Before Answering: If asked about returns, refunds, SLAs, or billing, call `kb_policy_search` to verify official company policy.\n3. Orders & Tracking: Use `order_status_lookup` to check delivery and return eligibility.\n4. Refunds & Financial Actions: Use `process_order_refund` to issue refunds. Note that any refund over $100 requires manager review.\n5. Escalations & Tickets: If an issue requires human attention, bug investigation, or manager sign-off, call `create_support_ticket`.\n6. VIP Protocol: If the customer has VIP Enterprise or Executive Platinum status and experiences an issue, call `dispatch_urgent_alert` to #vip-support.\n\nTone: Professional, empathetic, concise, and solution-driven. Always cite relevant ticket IDs or refund IDs in your response."
+        }
+      },
+      "id": "e3f13b62-3850-4820-9426-9a2df96c5603",
+      "name": "AI Agent (OmniOps Engine)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        600,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "e4f13b62-3850-4820-9426-9a2df96c5604",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        460,
+        640
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "openAiApi_placeholder",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "e5f13b62-3850-4820-9426-9a2df96c5605",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "crm_lookup",
+        "description": "Fetch customer profile, VIP status tier, balance, and order IDs by email or customer ID. Call this whenever a customer identifier is provided.",
+        "url": "=http://localhost:8000/api/customers/{{ $fromAI('identifier', 'Customer email or customer ID such as CUST-101') }}"
+      },
+      "id": "e6f13b62-3850-4820-9426-9a2df96c5606",
+      "name": "Tool: CRM Customer Lookup",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        780,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "kb_policy_search",
+        "description": "Search enterprise knowledge base for return policies, warranty terms, VIP SLAs, and shipping rules. Always search before answering policy questions.",
+        "url": "=http://localhost:8000/api/kb/search?query={{ encodeURIComponent($fromAI('query', 'Policy search keywords')) }}"
+      },
+      "id": "e7f13b62-3850-4820-9426-9a2df96c5607",
+      "name": "Tool: Knowledge Base RAG",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "order_status_lookup",
+        "description": "Retrieve order tracking status, shipping carrier, tracking code, amount, and return eligibility by Order ID (e.g., ORD-9021).",
+        "url": "=http://localhost:8000/api/orders/{{ $fromAI('order_id', 'Order ID such as ORD-9021 or ORD-9999') }}"
+      },
+      "id": "e8f13b62-3850-4820-9426-9a2df96c5608",
+      "name": "Tool: Order Status Lookup",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1060,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "process_order_refund",
+        "description": "Process a refund request for an order. Policy: orders up to $100 are auto-approved; orders over $100 create a manager approval ticket.",
+        "method": "POST",
+        "url": "http://localhost:8000/api/orders/refund",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"order_id\": \"{{ $fromAI('order_id', 'Order ID') }}\",\n  \"customer_id\": \"{{ $fromAI('customer_id', 'Customer ID') }}\",\n  \"amount\": {{ Number($fromAI('amount', 'Refund amount in numbers')) }},\n  \"reason\": \"{{ $fromAI('reason', 'Customer reason for refund') }}\"\n}"
+      },
+      "id": "e9f13b62-3850-4820-9426-9a2df96c5609",
+      "name": "Tool: Process Order Refund",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "create_support_ticket",
+        "description": "Create an enterprise support ticket for manual reviews, billing adjustments, or technical incidents.",
+        "method": "POST",
+        "url": "http://localhost:8000/api/tickets",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"customer_id\": \"{{ $fromAI('customer_id', 'Customer ID') }}\",\n  \"subject\": \"{{ $fromAI('subject', 'Ticket subject title') }}\",\n  \"description\": \"{{ $fromAI('description', 'Detailed problem description') }}\",\n  \"priority\": \"{{ $fromAI('priority', 'Priority level: P1, P2, or P3') }}\",\n  \"department\": \"{{ $fromAI('department', 'Department: billing, support, logistics') }}\"\n}"
+      },
+      "id": "eaf13b62-3850-4820-9426-9a2df96c5610",
+      "name": "Tool: Create Support Ticket",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1340,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "dispatch_urgent_alert",
+        "description": "Send urgent notifications to Slack or operations team for VIP customer issues, delivery delays, or escalation.",
+        "method": "POST",
+        "url": "http://localhost:8000/api/notify",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"channel\": \"{{ $fromAI('channel', 'Destination channel e.g. #vip-support or #ops-alerts') }}\",\n  \"message\": \"{{ $fromAI('message', 'Urgent alert summary') }}\",\n  \"priority\": \"{{ $fromAI('priority', 'Priority level e.g. URGENT') }}\"\n}"
+      },
+      "id": "ebf13b62-3850-4820-9426-9a2df96c5611",
+      "name": "Tool: Dispatch Urgent Alert",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1480,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"agent\": \"OmniOps Enterprise Agent\",\n  \"response\": {{ JSON.stringify($json.output || $json.text) }},\n  \"timestamp\": \"{{ $now.toISO() }}\"\n}",
+        "options": {}
+      },
+      "id": "ecf13b62-3850-4820-9426-9a2df96c5612",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        480
+      ]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook API Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (OmniOps Engine)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: CRM Customer Lookup": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Knowledge Base RAG": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Order Status Lookup": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Process Order Refund": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Create Support Ticket": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Dispatch Urgent Alert": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (OmniOps Engine)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
